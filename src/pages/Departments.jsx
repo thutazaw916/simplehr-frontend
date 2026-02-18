@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext.jsx';
 import API from '../services/api';
 import toast from 'react-hot-toast';
 
 const Departments = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [departments, setDepartments] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', description: '' });
@@ -19,7 +21,7 @@ const Departments = () => {
       const res = await API.get('/departments');
       setDepartments(res.data.data);
     } catch (error) {
-      toast.error('Failed to load departments');
+      toast.error(t('error'));
     }
   };
 
@@ -28,17 +30,17 @@ const Departments = () => {
     try {
       if (editId) {
         await API.put(`/departments/${editId}`, form);
-        toast.success('Department updated');
+        toast.success(t('success'));
       } else {
         await API.post('/departments', form);
-        toast.success('Department created');
+        toast.success(t('success'));
       }
       setForm({ name: '', description: '' });
       setShowForm(false);
       setEditId(null);
       fetchDepartments();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed');
+      toast.error(error.response?.data?.message || t('error'));
     }
   };
 
@@ -49,13 +51,13 @@ const Departments = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this department?')) {
+    if (window.confirm(t('confirm') + '?')) {
       try {
         await API.delete(`/departments/${id}`);
-        toast.success('Department deleted');
+        toast.success(t('success'));
         fetchDepartments();
       } catch (error) {
-        toast.error('Failed to delete');
+        toast.error(t('error'));
       }
     }
   };
@@ -63,22 +65,22 @@ const Departments = () => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Departments</h1>
+        <h1 style={styles.title}>{t('departments')}</h1>
         <div>
-          <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>Back</button>
+          <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>{t('back')}</button>
           <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ name: '', description: '' }); }} style={styles.addBtn}>
-            {showForm ? 'Cancel' : '+ Add Department'}
+            {showForm ? t('cancel') : '+ ' + t('addDepartment')}
           </button>
         </div>
       </div>
 
       {showForm && (
         <div style={styles.formCard}>
-          <h3>{editId ? 'Edit Department' : 'Add Department'}</h3>
+          <h3>{editId ? t('edit') : t('addDepartment')}</h3>
           <form onSubmit={handleSubmit}>
-            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Department Name" style={styles.input} required />
-            <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" style={styles.input} />
-            <button type="submit" style={styles.submitBtn}>{editId ? 'Update' : 'Create'}</button>
+            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('departmentName')} style={styles.input} required />
+            <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('description')} style={styles.input} />
+            <button type="submit" style={styles.submitBtn}>{editId ? t('save') : t('add')}</button>
           </form>
         </div>
       )}
@@ -88,15 +90,15 @@ const Departments = () => {
           <div key={dept._id} style={styles.card}>
             <div>
               <h3 style={{ color: '#333', marginBottom: '5px' }}>{dept.name}</h3>
-              <p style={{ color: '#666', fontSize: '14px' }}>{dept.description || 'No description'}</p>
+              <p style={{ color: '#666', fontSize: '14px' }}>{dept.description || t('noDescription')}</p>
             </div>
             <div>
-              <button onClick={() => handleEdit(dept)} style={styles.editBtn}>Edit</button>
-              <button onClick={() => handleDelete(dept._id)} style={styles.deleteBtn}>Delete</button>
+              <button onClick={() => handleEdit(dept)} style={styles.editBtn}>{t('edit')}</button>
+              <button onClick={() => handleDelete(dept._id)} style={styles.deleteBtn}>{t('delete')}</button>
             </div>
           </div>
         ))}
-        {departments.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>No departments found</p>}
+        {departments.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>{t('noRecords')}</p>}
       </div>
     </div>
   );
