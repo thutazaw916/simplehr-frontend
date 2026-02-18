@@ -16,18 +16,21 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [todayRes, empRes, deptRes, leaveRes] = await Promise.all([
-        API.get('/attendance/today'),
-        API.get('/employees'),
-        API.get('/departments'),
-        API.get('/leaves?status=pending')
-      ]);
+      const todayRes = await API.get('/attendance/today');
       setTodayStatus(todayRes.data.data);
-      setStats({
-        employees: empRes.data.count,
-        departments: deptRes.data.count,
-        leaves: leaveRes.data.count
-      });
+
+      if (user?.role === 'owner' || user?.role === 'hr') {
+        const [empRes, deptRes, leaveRes] = await Promise.all([
+          API.get('/employees'),
+          API.get('/departments'),
+          API.get('/leaves?status=pending')
+        ]);
+        setStats({
+          employees: empRes.data.count,
+          departments: deptRes.data.count,
+          leaves: leaveRes.data.count
+        });
+      }
     } catch (error) {
       console.log('Error:', error.message);
     }
@@ -59,38 +62,58 @@ const Dashboard = () => {
     toast.success('Logged out');
   };
 
+  const isAdmin = user?.role === 'owner' || user?.role === 'hr';
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
           <h1 style={styles.title}>SimpleHR</h1>
-          <p style={styles.welcome}>Welcome, {user?.name}! ({user?.role})</p>
+          <p style={styles.welcome}>Welcome, {user?.name}!</p>
+          <span style={styles.roleBadge}>{user?.role?.toUpperCase()}</span>
         </div>
         <button onClick={handleLogout} style={styles.logoutBtn}>Logout</button>
       </div>
+
       <div style={styles.attendanceCard}>
         <h2>Todays Attendance</h2>
         {todayStatus && !todayStatus.checkedIn && (
           <button onClick={handleCheckIn} style={styles.checkInBtn}>Check In</button>
         )}
         {todayStatus && todayStatus.checkedIn && !todayStatus.checkedOut && (
-          <button onClick={handleCheckOut} style={styles.checkOutBtn}>Check Out</button>
+          <div>
+            <p style={{ color: '#27ae60', marginBottom: '10px' }}>Checked In</p>
+            <button onClick={handleCheckOut} style={styles.checkOutBtn}>Check Out</button>
+          </div>
         )}
         {todayStatus && todayStatus.checkedOut && (
-          <p style={styles.doneText}>Done for today!</p>
+          <p style={styles.doneText}>Done for today! ({todayStatus.attendance?.workHours}h)</p>
         )}
       </div>
-      <div style={styles.statsRow}>
-        <div style={styles.statCard}><h3>{stats.employees}</h3><p>Employees</p></div>
-        <div style={styles.statCard}><h3>{stats.departments}</h3><p>Departments</p></div>
-        <div style={styles.statCard}><h3>{stats.leaves}</h3><p>Pending Leaves</p></div>
-      </div>
+
+      {isAdmin && (
+        <div style={styles.statsRow}>
+          <div style={styles.statCard} onClick={() => navigate('/employees')}>
+            <h3 style={{ color: '#1a73e8', fontSize: '24px' }}>{stats.employees}</h3>
+            <p>Employees</p>
+          </div>
+          <div style={styles.statCard} onClick={() => navigate('/departments')}>
+            <h3 style={{ color: '#27ae60', fontSize: '24px' }}>{stats.departments}</h3>
+            <p>Departments</p>
+          </div>
+          <div style={styles.statCard} onClick={() => navigate('/leaves')}>
+            <h3 style={{ color: '#e67e22', fontSize: '24px' }}>{stats.leaves}</h3>
+            <p>Pending Leaves</p>
+          </div>
+        </div>
+      )}
+
       <div style={styles.menuGrid}>
-        <div style={styles.menuItem} onClick={() => navigate('/employees')}>Employees</div>
-        <div style={styles.menuItem} onClick={() => navigate('/departments')}>Departments</div>
+        {isAdmin && <div style={styles.menuItem} onClick={() => navigate('/employees')}>Employees</div>}
+        {isAdmin && <div style={styles.menuItem} onClick={() => navigate('/departments')}>Departments</div>}
         <div style={styles.menuItem} onClick={() => navigate('/attendance')}>Attendance</div>
         <div style={styles.menuItem} onClick={() => navigate('/leaves')}>Leaves</div>
-        <div style={styles.menuItem} onClick={() => navigate('/payroll')}>Payroll</div>
+        {isAdmin && <div style={styles.menuItem} onClick={() => navigate('/payroll')}>Payroll</div>}
         <div style={styles.menuItem} onClick={() => navigate('/profile')}>Profile</div>
       </div>
     </div>
@@ -101,7 +124,8 @@ const styles = {
   container: { maxWidth: '800px', margin: '0 auto', padding: '20px' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' },
   title: { color: '#1a73e8', marginBottom: '5px' },
-  welcome: { color: '#666' },
+  welcome: { color: '#666', marginBottom: '5px' },
+  roleBadge: { backgroundColor: '#1a73e8', color: 'white', padding: '3px 10px', borderRadius: '12px', fontSize: '12px' },
   logoutBtn: { padding: '10px 20px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' },
   attendanceCard: { backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginBottom: '30px', textAlign: 'center' },
   checkInBtn: { padding: '15px 40px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '8px', fontSize: '18px', cursor: 'pointer', marginTop: '10px' },
