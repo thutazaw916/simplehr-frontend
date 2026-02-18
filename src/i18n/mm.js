@@ -1,0 +1,124 @@
+export default {
+  // Common
+  welcome: 'မင်္ဂလာပါ 👋',
+  owner: 'ပိုင်ရှင်',
+  hr: 'HR',
+  employee: 'ဝန်ထမ်း',
+  back: 'နောက်သို့',
+  save: 'သိမ်းမည်',
+  cancel: 'မလုပ်တော့ပါ',
+  delete: 'ဖျက်မည်',
+  edit: 'ပြင်မည်',
+  add: 'ထည့်မည်',
+  search: 'ရှာရန်',
+  loading: 'ခဏစောင့်ပါ...',
+  success: 'အောင်မြင်ပါသည်',
+  error: 'အမှားရှိပါသည်',
+  confirm: 'အတည်ပြုမည်',
+  yes: 'ဟုတ်ကဲ့',
+  no: 'မဟုတ်ပါ',
+
+  // Home
+  todayAttendance: 'ယနေ့ တက်ဆင်းမှတ်တမ်း',
+  totalEmployees: 'ဝန်ထမ်းများ',
+  leaveRequests: 'ခွင့်တောင်းခံချက်',
+  records: 'မှတ်တမ်းများ',
+  viewAll: 'အားလုံးကြည့်ရန်',
+  noRecords: 'မှတ်တမ်း မရှိသေးပါ',
+
+  // Management
+  management: 'စီမံခန့်ခွဲမှု',
+  departments: 'ဌာနများ',
+  attendanceRecords: 'တက်ဆင်းမှတ်တမ်း',
+  specialDays: 'အခကြေးငွေ',
+
+  // Bottom Tabs
+  attendance: 'တက်ဆင်း',
+  leave: 'ခွင့်',
+  employees: 'ဝန်ထမ်းများ',
+  salary: 'လစာ',
+  profile: 'ကိုယ့်အချက်',
+
+  // Attendance
+  checkIn: 'အလုပ်ဝင်ချိန် မှတ်မည်',
+  checkOut: 'အလုပ်ဆင်းချိန် မှတ်မည်',
+  checkedIn: 'ရုံးဝင်ပြီး',
+  checkedOut: 'ရုံးထွက်ပြီး',
+  notCheckedIn: 'ရုံးမဝင်ရသေးပါ',
+  checkInFailed: 'Check in မအောင်မြင်ပါ',
+  checkOutFailed: 'Check out မအောင်မြင်ပါ',
+  onTime: 'အချိန်မှန်',
+  late: 'နောက်ကျ',
+  totalHours: 'စုစုပေါင်း',
+  hours: 'နာရီ',
+  workDone: 'ယနေ့ အလုပ်ပြီးပါပြီ',
+
+  // Leave
+  applyLeave: 'ခွင့်တင်မယ်',
+  leaveBalance: 'ခွင့်ရက်ကျန်',
+  leaveHistory: 'ခွင့်မှတ်တမ်း',
+  approved: 'ခွင့်ပြုပြီး',
+  rejected: 'ပယ်ချပြီး',
+  pending: 'စောင့်ဆိုင်းဆဲ',
+  casualLeave: 'ခွင့်ရက်',
+  sickLeave: 'ဆေးခွင့်',
+  annualLeave: 'နှစ်ပတ်လည်ခွင့်',
+  leaveType: 'ခွင့်အမျိုးအစား',
+  leaveFrom: 'ခွင့်စရက်',
+  leaveTo: 'ခွင့်ဆုံးရက်',
+  leaveReason: 'ခွင့်အကြောင်းပြချက်',
+  submitLeave: 'ခွင့်တင်မည်',
+
+  // Salary
+  payroll: 'လစာ',
+  basicSalary: 'အခြေခံလစာ',
+  deductions: 'နုတ်ယူငွေ',
+  netSalary: 'လက်ရှိလစာ',
+  payslip: 'လစာဖော်ပြချက်',
+  calculateSalary: 'လစာတွက်မယ်',
+
+  // Profile
+  editProfile: 'ပြင်ဆင်မယ်',
+  changePassword: 'စကားဝှက်ပြောင်းမယ်',
+  language: 'ဘာသာစကား',
+  logout: 'ထွက်မယ်',
+  phone: 'ဖုန်း',
+  company: 'ကုမ္ပဏီ',
+  status: 'အခြေအနေ',
+  active: 'အသုံးပြုဆဲ',
+  inactive: 'ပိတ်ထားသည်',
+  joined: 'စတင်သည့်နေ့',
+
+  // Settings
+  settings: 'ဆက်တင်',
+  myanmar: 'မြန်မာ',
+  english: 'English',
+
+  // Auth
+  login: 'ဝင်မည်',
+  register: 'အကောင့်ဖွင့်မည်',
+  phonePlaceholder: 'ဖုန်းနံပါတ်ထည့်ပါ',
+  passwordPlaceholder: 'စကားဝှက်ထည့်ပါ',
+  namePlaceholder: 'နာမည်ထည့်ပါ',
+  companyNamePlaceholder: 'ကုမ္ပဏီအမည်ထည့်ပါ',
+  noAccount: 'အကောင့်မရှိသေးပါလား?',
+  hasAccount: 'အကောင့်ရှိပြီးသားလား?',
+
+  // Employees
+  addEmployee: 'ဝန်ထမ်းထည့်မည်',
+  employeeList: 'ဝန်ထမ်းစာရင်း',
+  employeeName: 'ဝန်ထမ်းအမည်',
+  position: 'ရာထူး',
+  department: 'ဌာန',
+
+  // Departments
+  addDepartment: 'ဌာနထည့်မည်',
+  departmentName: 'ဌာနအမည်',
+  departmentList: 'ဌာနစာရင်း',
+
+  // Subscription
+  subscription: 'အခကြေးငွေ',
+  freePlan: 'အခမဲ့',
+  proPlan: 'ပရို',
+  enterprisePlan: 'လုပ်ငန်းကြီး',
+};

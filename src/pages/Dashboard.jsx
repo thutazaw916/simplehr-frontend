@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import toast from 'react-hot-toast';
@@ -7,6 +8,7 @@ import BottomNav from '../components/BottomNav';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [todayStatus, setTodayStatus] = useState(null);
   const [myAttendances, setMyAttendances] = useState([]);
@@ -43,7 +45,7 @@ const Dashboard = () => {
       toast.success(res.data.message);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Check in မအောင်မြင်ပါ');
+      toast.error(error.response?.data?.message || t('checkInFailed'));
     }
   };
 
@@ -53,22 +55,27 @@ const Dashboard = () => {
       toast.success(res.data.message);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Check out မအောင်မြင်ပါ');
+      toast.error(error.response?.data?.message || t('checkOutFailed'));
     }
   };
 
   const isAdmin = user?.role === 'owner' || user?.role === 'hr';
   const now = new Date();
-  const timeStr = now.toLocaleTimeString('my-MM', { hour: '2-digit', minute: '2-digit' });
   const dateStr = now.toLocaleDateString('my-MM', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const getRoleName = (role) => {
+    if (role === 'owner') return t('owner');
+    if (role === 'hr') return t('hr');
+    return t('employee');
+  };
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
-          <p style={styles.greeting}>မင်္ဂလာပါ 👋</p>
+          <p style={styles.greeting}>{t('welcome')}</p>
           <h2 style={styles.userName}>{user?.name}</h2>
-          <span style={styles.roleBadge}>{user?.role === 'owner' ? 'ပိုင်ရှင်' : user?.role === 'hr' ? 'HR' : 'ဝန်ထမ်း'}</span>
+          <span style={styles.roleBadge}>{getRoleName(user?.role)}</span>
         </div>
         <div style={styles.avatarCircle}>{user?.name?.charAt(0)}</div>
       </div>
@@ -78,13 +85,13 @@ const Dashboard = () => {
       </div>
 
       <div style={styles.attendanceCard}>
-        <h3 style={styles.sectionTitle}>ယနေ့ တက်ဆင်းမှတ်တမ်း</h3>
+        <h3 style={styles.sectionTitle}>{t('todayAttendance')}</h3>
 
         {todayStatus && !todayStatus.checkedIn && (
           <div style={styles.checkBtnArea}>
             <button onClick={handleCheckIn} style={styles.checkInBtn}>
               <span style={{ fontSize: '24px' }}>🕐</span>
-              <span>အလုပ်ဝင်ချိန် မှတ်မည်</span>
+              <span>{t('checkIn')}</span>
             </button>
           </div>
         )}
@@ -93,19 +100,19 @@ const Dashboard = () => {
           <div>
             <div style={styles.timeInfo}>
               <div style={styles.timeBox}>
-                <p style={styles.timeLabel}>ဝင်ချိန်</p>
+                <p style={styles.timeLabel}>{t('checkIn')}</p>
                 <p style={styles.timeValue}>{new Date(todayStatus.attendance?.checkIn?.time).toLocaleTimeString('my-MM', {hour:'2-digit', minute:'2-digit'})}</p>
               </div>
               <div style={styles.statusDot}>
                 <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: todayStatus.attendance?.status === 'present' ? '#27ae60' : '#e67e22' }}></div>
                 <p style={{ fontSize: '12px', color: todayStatus.attendance?.status === 'present' ? '#27ae60' : '#e67e22' }}>
-                  {todayStatus.attendance?.status === 'present' ? 'အချိန်မှန်' : 'နောက်ကျ'}
+                  {todayStatus.attendance?.status === 'present' ? t('onTime') : t('late')}
                 </p>
               </div>
             </div>
             <button onClick={handleCheckOut} style={styles.checkOutBtn}>
               <span style={{ fontSize: '24px' }}>🏠</span>
-              <span>အလုပ်ဆင်းချိန် မှတ်မည်</span>
+              <span>{t('checkOut')}</span>
             </button>
           </div>
         )}
@@ -114,19 +121,19 @@ const Dashboard = () => {
           <div style={styles.doneArea}>
             <div style={styles.timeInfo}>
               <div style={styles.timeBox}>
-                <p style={styles.timeLabel}>ဝင်ချိန်</p>
+                <p style={styles.timeLabel}>{t('checkIn')}</p>
                 <p style={styles.timeValue}>{new Date(todayStatus.attendance?.checkIn?.time).toLocaleTimeString('my-MM', {hour:'2-digit', minute:'2-digit'})}</p>
               </div>
               <div style={styles.timeBox}>
-                <p style={styles.timeLabel}>ဆင်းချိန်</p>
+                <p style={styles.timeLabel}>{t('checkOut')}</p>
                 <p style={styles.timeValue}>{new Date(todayStatus.attendance?.checkOut?.time).toLocaleTimeString('my-MM', {hour:'2-digit', minute:'2-digit'})}</p>
               </div>
               <div style={styles.timeBox}>
-                <p style={styles.timeLabel}>စုစုပေါင်း</p>
-                <p style={styles.timeValue}>{todayStatus.attendance?.workHours} နာရီ</p>
+                <p style={styles.timeLabel}>{t('totalHours')}</p>
+                <p style={styles.timeValue}>{todayStatus.attendance?.workHours} {t('hours')}</p>
               </div>
             </div>
-            <p style={styles.doneText}>✅ ယနေ့ အလုပ်ပြီးပါပြီ</p>
+            <p style={styles.doneText}>✅ {t('workDone')}</p>
           </div>
         )}
       </div>
@@ -135,30 +142,30 @@ const Dashboard = () => {
         <div style={styles.statsRow}>
           <div style={styles.statCard} onClick={() => navigate('/employees')}>
             <h3 style={{ color: '#1a73e8', fontSize: '28px' }}>{stats.employees}</h3>
-            <p style={{ color: '#666', fontSize: '13px' }}>ဝန်ထမ်းများ</p>
+            <p style={{ color: '#666', fontSize: '13px' }}>{t('totalEmployees')}</p>
           </div>
           <div style={styles.statCard} onClick={() => navigate('/leaves')}>
             <h3 style={{ color: '#e67e22', fontSize: '28px' }}>{stats.leaves}</h3>
-            <p style={{ color: '#666', fontSize: '13px' }}>ခွင့်တောင်းခံချက်</p>
+            <p style={{ color: '#666', fontSize: '13px' }}>{t('leaveRequests')}</p>
           </div>
         </div>
       )}
 
       <div style={styles.section}>
         <div style={styles.sectionHeader}>
-          <h3 style={styles.sectionTitle}>မှတ်တမ်းများ</h3>
-          <span style={styles.seeAll} onClick={() => navigate('/attendance')}>အားလုံးကြည့်ရန်</span>
+          <h3 style={styles.sectionTitle}>{t('records')}</h3>
+          <span style={styles.seeAll} onClick={() => navigate('/attendance')}>{t('viewAll')}</span>
         </div>
         {myAttendances.map((att) => (
           <div key={att._id} style={styles.recordCard}>
             <div>
               <p style={styles.recordDate}>{att.date}</p>
               <p style={{ color: att.status === 'present' ? '#27ae60' : '#e67e22', fontSize: '13px' }}>
-                {att.status === 'present' ? 'အချိန်မှန်' : 'နောက်ကျ'}
+                {att.status === 'present' ? t('onTime') : t('late')}
               </p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '14px', color: '#333' }}>{att.workHours} နာရီ</p>
+              <p style={{ fontSize: '14px', color: '#333' }}>{att.workHours} {t('hours')}</p>
               <p style={{ fontSize: '12px', color: '#999' }}>
                 {att.checkIn?.time ? new Date(att.checkIn.time).toLocaleTimeString('my-MM', {hour:'2-digit', minute:'2-digit'}) : '-'}
                 {' - '}
@@ -167,24 +174,24 @@ const Dashboard = () => {
             </div>
           </div>
         ))}
-        {myAttendances.length === 0 && <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>မှတ်တမ်း မရှိသေးပါ</p>}
+        {myAttendances.length === 0 && <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>{t('noRecords')}</p>}
       </div>
 
       {isAdmin && (
         <div style={styles.adminMenu}>
-          <h3 style={styles.sectionTitle}>စီမံခန့်ခွဲမှု</h3>
+          <h3 style={styles.sectionTitle}>{t('management')}</h3>
           <div style={styles.menuGrid}>
             <div style={styles.menuCard} onClick={() => navigate('/departments')}>
               <span style={{ fontSize: '28px' }}>🏢</span>
-              <p>ဌာနများ</p>
+              <p>{t('departments')}</p>
             </div>
             <div style={styles.menuCard} onClick={() => navigate('/attendance')}>
               <span style={{ fontSize: '28px' }}>📊</span>
-              <p>တက်ဆင်းမှတ်တမ်း</p>
+              <p>{t('attendanceRecords')}</p>
             </div>
             <div style={styles.menuCard} onClick={() => navigate('/subscription')}>
               <span style={{ fontSize: '28px' }}>⭐</span>
-              <p>အခကြေးငွေ</p>
+              <p>{t('specialDays')}</p>
             </div>
           </div>
         </div>
