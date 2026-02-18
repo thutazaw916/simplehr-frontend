@@ -161,4 +161,9 @@ export default {
   paymentSuccess: 'Payment recorded! Plan upgraded!',
   paymentFailed: 'Payment failed',
   paymentHistory: 'Payment History',
+
+  // Theme
+  themeMode: 'Theme',
+  darkMode: 'Dark Mode',
+  lightMode: 'Light Mode',
 };

@@ -161,4 +161,9 @@ export default {
   paymentSuccess: 'ငွေပေးချေပြီးပါပြီ! အဆင့်တိုးပြီးပါပြီ!',
   paymentFailed: 'ငွေပေးချေမှု မအောင်မြင်ပါ',
   paymentHistory: 'ငွေပေးချေမှု မှတ်တမ်း',
+
+  // Theme
+  themeMode: 'အပြင်အဆင်',
+  darkMode: 'Dark Mode',
+  lightMode: 'Light Mode',
 };
