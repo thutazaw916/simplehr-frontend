@@ -115,6 +115,7 @@ const Dashboard = () => {
         <div style={styles.menuItem} onClick={() => navigate('/leaves')}>Leaves</div>
         {isAdmin && <div style={styles.menuItem} onClick={() => navigate('/payroll')}>Payroll</div>}
         <div style={styles.menuItem} onClick={() => navigate('/profile')}>Profile</div>
+        {isAdmin && <div style={{...styles.menuItem, backgroundColor: '#f39c12'}} onClick={() => navigate('/subscription')}>Subscription</div>}
       </div>
     </div>
   );

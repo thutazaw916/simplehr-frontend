@@ -10,6 +10,7 @@ import Attendance from './pages/Attendance';
 import Leaves from './pages/Leaves';
 import Payroll from './pages/Payroll';
 import Profile from './pages/Profile';
+import Subscription from './pages/Subscription';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -38,6 +39,7 @@ function App() {
           <Route path="/leaves" element={<PrivateRoute><Leaves /></PrivateRoute>} />
           <Route path="/payroll" element={<PrivateRoute><Payroll /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>
