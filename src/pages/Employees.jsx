@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext';
 import API from '../services/api';
 import toast from 'react-hot-toast';
 
 const Employees = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [employees, setEmployees] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', password: '123456', role: 'employee' });
@@ -19,7 +21,7 @@ const Employees = () => {
       const res = await API.get('/employees');
       setEmployees(res.data.data);
     } catch (error) {
-      toast.error('Failed to load employees');
+      toast.error(t('error'));
     }
   };
 
@@ -32,17 +34,17 @@ const Employees = () => {
     try {
       if (editId) {
         await API.put(`/employees/${editId}`, form);
-        toast.success('Employee updated');
+        toast.success(t('success'));
       } else {
         await API.post('/employees', form);
-        toast.success('Employee added');
+        toast.success(t('success'));
       }
       setForm({ name: '', phone: '', password: '123456', role: 'employee' });
       setShowForm(false);
       setEditId(null);
       fetchEmployees();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed');
+      toast.error(error.response?.data?.message || t('error'));
     }
   };
 
@@ -53,13 +55,13 @@ const Employees = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this employee?')) {
+    if (window.confirm(t('confirm') + '?')) {
       try {
         await API.delete(`/employees/${id}`);
-        toast.success('Employee deleted');
+        toast.success(t('success'));
         fetchEmployees();
       } catch (error) {
-        toast.error('Failed to delete');
+        toast.error(t('error'));
       }
     }
   };
@@ -67,27 +69,27 @@ const Employees = () => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Employees</h1>
+        <h1 style={styles.title}>{t('employees')}</h1>
         <div>
-          <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>Back</button>
+          <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>{t('back')}</button>
           <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ name: '', phone: '', password: '123456', role: 'employee' }); }} style={styles.addBtn}>
-            {showForm ? 'Cancel' : '+ Add Employee'}
+            {showForm ? t('cancel') : '+ ' + t('addEmployee')}
           </button>
         </div>
       </div>
 
       {showForm && (
         <div style={styles.formCard}>
-          <h3>{editId ? 'Edit Employee' : 'Add Employee'}</h3>
+          <h3>{editId ? t('edit') : t('addEmployee')}</h3>
           <form onSubmit={handleSubmit}>
-            <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Name" style={styles.input} required />
-            <input type="text" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" style={styles.input} required />
-            {!editId && <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Password" style={styles.input} />}
+            <input type="text" name="name" value={form.name} onChange={handleChange} placeholder={t('namePlaceholder')} style={styles.input} required />
+            <input type="text" name="phone" value={form.phone} onChange={handleChange} placeholder={t('phonePlaceholder')} style={styles.input} required />
+            {!editId && <input type="password" name="password" value={form.password} onChange={handleChange} placeholder={t('passwordPlaceholder')} style={styles.input} />}
             <select name="role" value={form.role} onChange={handleChange} style={styles.input}>
-              <option value="employee">Employee</option>
-              <option value="hr">HR</option>
+              <option value="employee">{t('employee')}</option>
+              <option value="hr">{t('hr')}</option>
             </select>
-            <button type="submit" style={styles.submitBtn}>{editId ? 'Update' : 'Add'}</button>
+            <button type="submit" style={styles.submitBtn}>{editId ? t('save') : t('add')}</button>
           </form>
         </div>
       )}
@@ -97,18 +99,18 @@ const Employees = () => {
           <div key={emp._id} style={styles.card}>
             <div>
               <h3 style={styles.empName}>{emp.name}</h3>
-              <p style={styles.empInfo}>{emp.phone} | {emp.role}</p>
+              <p style={styles.empInfo}>{emp.phone} | {emp.role === 'owner' ? t('owner') : emp.role === 'hr' ? t('hr') : t('employee')}</p>
               <p style={{ color: emp.isActive ? '#27ae60' : '#e74c3c' }}>
-                {emp.isActive ? 'Active' : 'Inactive'}
+                {emp.isActive ? t('active') : t('inactive')}
               </p>
             </div>
             <div>
-              <button onClick={() => handleEdit(emp)} style={styles.editBtn}>Edit</button>
-              <button onClick={() => handleDelete(emp._id)} style={styles.deleteBtn}>Delete</button>
+              <button onClick={() => handleEdit(emp)} style={styles.editBtn}>{t('edit')}</button>
+              <button onClick={() => handleDelete(emp._id)} style={styles.deleteBtn}>{t('delete')}</button>
             </div>
           </div>
         ))}
-        {employees.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>No employees found</p>}
+        {employees.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>{t('noRecords')}</p>}
       </div>
     </div>
   );

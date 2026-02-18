@@ -1,18 +1,20 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = user?.role === 'owner' || user?.role === 'hr';
 
   const tabs = [
-    { path: '/dashboard', label: 'တက်ဆင်း', icon: '🕐' },
-    { path: '/leaves', label: 'ခွင့်', icon: '📅' },
-    { path: '/employees', label: 'ဝန်ထမ်း', icon: '👥', admin: true },
-    { path: '/payroll', label: 'လစာ', icon: '💰', admin: true },
-    { path: '/profile', label: 'ကိုယ့်အချက်', icon: '👤' }
+    { path: '/dashboard', label: t('attendance'), icon: '🕐' },
+    { path: '/leaves', label: t('leave'), icon: '📅' },
+    { path: '/employees', label: t('employees'), icon: '👥', admin: true },
+    { path: '/payroll', label: t('salary'), icon: '💰', admin: true },
+    { path: '/profile', label: t('profile'), icon: '👤' }
   ];
 
   const filteredTabs = tabs.filter(tab => !tab.admin || isAdmin);

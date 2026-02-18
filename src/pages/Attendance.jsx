@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext';
 import API from '../services/api';
-import toast from 'react-hot-toast';
 
 const Attendance = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [attendances, setAttendances] = useState([]);
   const [myAttendances, setMyAttendances] = useState([]);
   const [tab, setTab] = useState('today');
@@ -29,18 +30,18 @@ const Attendance = () => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Attendance</h1>
-        <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>Back</button>
+        <h1 style={styles.title}>{t('attendance')}</h1>
+        <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>{t('back')}</button>
       </div>
 
       <div style={styles.tabs}>
-        <button onClick={() => setTab('today')} style={tab === 'today' ? styles.activeTab : styles.tab}>Today All</button>
-        <button onClick={() => setTab('my')} style={tab === 'my' ? styles.activeTab : styles.tab}>My Records</button>
+        <button onClick={() => setTab('today')} style={tab === 'today' ? styles.activeTab : styles.tab}>{t('todayAttendance')}</button>
+        <button onClick={() => setTab('my')} style={tab === 'my' ? styles.activeTab : styles.tab}>{t('records')}</button>
       </div>
 
       {tab === 'today' && (
         <div style={styles.list}>
-          <h3 style={{ marginBottom: '10px' }}>Today - {new Date().toISOString().split('T')[0]}</h3>
+          <h3 style={{ marginBottom: '10px' }}>{t('todayAttendance')} - {new Date().toISOString().split('T')[0]}</h3>
           {attendances.map((att) => (
             <div key={att._id} style={styles.card}>
               <div>
@@ -48,37 +49,41 @@ const Attendance = () => {
                 <p style={{ color: '#666', fontSize: '14px' }}>{att.user?.phone}</p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ color: att.status === 'present' ? '#27ae60' : '#e67e22', fontWeight: 'bold' }}>{att.status}</p>
-                <p style={{ fontSize: '12px', color: '#999' }}>
-                  In: {att.checkIn?.time ? new Date(att.checkIn.time).toLocaleTimeString() : '-'}
+                <p style={{ color: att.status === 'present' ? '#27ae60' : '#e67e22', fontWeight: 'bold' }}>
+                  {att.status === 'present' ? t('onTime') : t('late')}
                 </p>
                 <p style={{ fontSize: '12px', color: '#999' }}>
-                  Out: {att.checkOut?.time ? new Date(att.checkOut.time).toLocaleTimeString() : '-'}
+                  {t('checkIn')}: {att.checkIn?.time ? new Date(att.checkIn.time).toLocaleTimeString() : '-'}
+                </p>
+                <p style={{ fontSize: '12px', color: '#999' }}>
+                  {t('checkOut')}: {att.checkOut?.time ? new Date(att.checkOut.time).toLocaleTimeString() : '-'}
                 </p>
               </div>
             </div>
           ))}
-          {attendances.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>No attendance records</p>}
+          {attendances.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>{t('noRecords')}</p>}
         </div>
       )}
 
       {tab === 'my' && (
         <div style={styles.list}>
-          <h3 style={{ marginBottom: '10px' }}>My Attendance</h3>
+          <h3 style={{ marginBottom: '10px' }}>{t('records')}</h3>
           {myAttendances.map((att) => (
             <div key={att._id} style={styles.card}>
               <div>
                 <h4>{att.date}</h4>
-                <p style={{ color: att.status === 'present' ? '#27ae60' : '#e67e22' }}>{att.status}</p>
+                <p style={{ color: att.status === 'present' ? '#27ae60' : '#e67e22' }}>
+                  {att.status === 'present' ? t('onTime') : t('late')}
+                </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: '14px' }}>In: {att.checkIn?.time ? new Date(att.checkIn.time).toLocaleTimeString() : '-'}</p>
-                <p style={{ fontSize: '14px' }}>Out: {att.checkOut?.time ? new Date(att.checkOut.time).toLocaleTimeString() : '-'}</p>
-                <p style={{ fontSize: '14px', fontWeight: 'bold' }}>{att.workHours}h</p>
+                <p style={{ fontSize: '14px' }}>{t('checkIn')}: {att.checkIn?.time ? new Date(att.checkIn.time).toLocaleTimeString() : '-'}</p>
+                <p style={{ fontSize: '14px' }}>{t('checkOut')}: {att.checkOut?.time ? new Date(att.checkOut.time).toLocaleTimeString() : '-'}</p>
+                <p style={{ fontSize: '14px', fontWeight: 'bold' }}>{att.workHours} {t('hours')}</p>
               </div>
             </div>
           ))}
-          {myAttendances.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>No records</p>}
+          {myAttendances.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>{t('noRecords')}</p>}
         </div>
       )}
     </div>

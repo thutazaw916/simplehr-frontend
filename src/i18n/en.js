@@ -63,11 +63,14 @@ export default {
   casualLeave: 'Casual Leave',
   sickLeave: 'Sick Leave',
   annualLeave: 'Annual Leave',
+  unpaidLeave: 'Unpaid Leave',
+  otherLeave: 'Other Leave',
   leaveType: 'Leave Type',
   leaveFrom: 'From',
   leaveTo: 'To',
   leaveReason: 'Reason',
   submitLeave: 'Submit Leave',
+  days: 'days',
 
   // Salary
   payroll: 'Payroll',
@@ -76,6 +79,12 @@ export default {
   netSalary: 'Net Salary',
   payslip: 'Payslip',
   calculateSalary: 'Calculate Salary',
+  draft: 'Draft',
+  confirmed: 'Confirmed',
+  paid: 'Paid',
+  selectEmployee: 'Select Employee',
+  month: 'Month',
+  year: 'Year',
 
   // Profile
   editProfile: 'Edit Profile',

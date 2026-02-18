@@ -63,11 +63,14 @@ export default {
   casualLeave: 'ခွင့်ရက်',
   sickLeave: 'ဆေးခွင့်',
   annualLeave: 'နှစ်ပတ်လည်ခွင့်',
+  unpaidLeave: 'လစာမဲ့ခွင့်',
+  otherLeave: 'အခြားခွင့်',
   leaveType: 'ခွင့်အမျိုးအစား',
   leaveFrom: 'ခွင့်စရက်',
   leaveTo: 'ခွင့်ဆုံးရက်',
   leaveReason: 'ခွင့်အကြောင်းပြချက်',
   submitLeave: 'ခွင့်တင်မည်',
+  days: 'ရက်',
 
   // Salary
   payroll: 'လစာ',
@@ -76,6 +79,12 @@ export default {
   netSalary: 'လက်ရှိလစာ',
   payslip: 'လစာဖော်ပြချက်',
   calculateSalary: 'လစာတွက်မယ်',
+  draft: 'မူကြမ်း',
+  confirmed: 'အတည်ပြုပြီး',
+  paid: 'ပေးပြီး',
+  selectEmployee: 'ဝန်ထမ်းရွေးပါ',
+  month: 'လ',
+  year: 'နှစ်',
 
   // Profile
   editProfile: 'ပြင်ဆင်မယ်',

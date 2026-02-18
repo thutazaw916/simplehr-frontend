@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext';
 import API from '../services/api';
 import toast from 'react-hot-toast';
 
 const Payroll = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [payrolls, setPayrolls] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -36,62 +38,69 @@ const Payroll = () => {
         year: Number(form.year),
         basicSalary: Number(form.basicSalary)
       });
-      toast.success('Payroll generated');
+      toast.success(t('success'));
       setShowForm(false);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed');
+      toast.error(error.response?.data?.message || t('error'));
     }
   };
 
   const handleConfirm = async (id) => {
     try {
       await API.put(`/payroll/${id}/confirm`);
-      toast.success('Payroll confirmed');
+      toast.success(t('success'));
       fetchData();
     } catch (error) {
-      toast.error('Failed');
+      toast.error(t('error'));
     }
   };
 
   const handlePay = async (id) => {
     try {
       await API.put(`/payroll/${id}/pay`);
-      toast.success('Marked as paid');
+      toast.success(t('success'));
       fetchData();
     } catch (error) {
-      toast.error('Failed');
+      toast.error(t('error'));
     }
   };
 
   const statusColor = { draft: '#f39c12', confirmed: '#3498db', paid: '#27ae60' };
 
+  const getStatusText = (status) => {
+    if (status === 'draft') return t('draft');
+    if (status === 'confirmed') return t('confirmed');
+    if (status === 'paid') return t('paid');
+    return status;
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Payroll</h1>
+        <h1 style={styles.title}>{t('payroll')}</h1>
         <div>
-          <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>Back</button>
+          <button onClick={() => navigate('/dashboard')} style={styles.backBtn}>{t('back')}</button>
           <button onClick={() => setShowForm(!showForm)} style={styles.addBtn}>
-            {showForm ? 'Cancel' : '+ Generate Payroll'}
+            {showForm ? t('cancel') : '+ ' + t('calculateSalary')}
           </button>
         </div>
       </div>
 
       {showForm && (
         <div style={styles.formCard}>
-          <h3>Generate Payroll</h3>
+          <h3>{t('calculateSalary')}</h3>
           <form onSubmit={handleSubmit}>
             <select value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })} style={styles.input} required>
-              <option value="">Select Employee</option>
+              <option value="">{t('selectEmployee')}</option>
               {employees.map((emp) => (
-                <option key={emp._id} value={emp._id}>{emp.name} ({emp.role})</option>
+                <option key={emp._id} value={emp._id}>{emp.name} ({emp.role === 'owner' ? t('owner') : emp.role === 'hr' ? t('hr') : t('employee')})</option>
               ))}
             </select>
-            <input type="number" value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} placeholder="Month (1-12)" style={styles.input} min="1" max="12" required />
-            <input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder="Year" style={styles.input} required />
-            <input type="number" value={form.basicSalary} onChange={(e) => setForm({ ...form, basicSalary: e.target.value })} placeholder="Basic Salary" style={styles.input} required />
-            <button type="submit" style={styles.submitBtn}>Generate</button>
+            <input type="number" value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} placeholder={t('month')} style={styles.input} min="1" max="12" required />
+            <input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder={t('year')} style={styles.input} required />
+            <input type="number" value={form.basicSalary} onChange={(e) => setForm({ ...form, basicSalary: e.target.value })} placeholder={t('basicSalary')} style={styles.input} required />
+            <button type="submit" style={styles.submitBtn}>{t('calculateSalary')}</button>
           </form>
         </div>
       )}
@@ -102,16 +111,16 @@ const Payroll = () => {
             <div>
               <h4>{pay.user?.name || 'Unknown'}</h4>
               <p style={{ color: '#666', fontSize: '14px' }}>{pay.month}/{pay.year}</p>
-              <p style={{ fontSize: '13px' }}>Basic: {pay.basicSalary?.toLocaleString()} | Net: <strong>{pay.netSalary?.toLocaleString()}</strong></p>
+              <p style={{ fontSize: '13px' }}>{t('basicSalary')}: {pay.basicSalary?.toLocaleString()} | {t('netSalary')}: <strong>{pay.netSalary?.toLocaleString()}</strong></p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ color: statusColor[pay.status], fontWeight: 'bold', marginBottom: '5px' }}>{pay.status.toUpperCase()}</p>
-              {pay.status === 'draft' && <button onClick={() => handleConfirm(pay._id)} style={styles.confirmBtn}>Confirm</button>}
-              {pay.status === 'confirmed' && <button onClick={() => handlePay(pay._id)} style={styles.payBtn}>Mark Paid</button>}
+              <p style={{ color: statusColor[pay.status], fontWeight: 'bold', marginBottom: '5px' }}>{getStatusText(pay.status)}</p>
+              {pay.status === 'draft' && <button onClick={() => handleConfirm(pay._id)} style={styles.confirmBtn}>{t('confirm')}</button>}
+              {pay.status === 'confirmed' && <button onClick={() => handlePay(pay._id)} style={styles.payBtn}>{t('paid')}</button>}
             </div>
           </div>
         ))}
-        {payrolls.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>No payroll records</p>}
+        {payrolls.length === 0 && <p style={{ textAlign: 'center', color: '#999' }}>{t('noRecords')}</p>}
       </div>
     </div>
   );
