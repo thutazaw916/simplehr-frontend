@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useLanguage } from '../i18n/LanguageContext.jsx';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 

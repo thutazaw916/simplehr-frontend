@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useLanguage } from '../i18n/LanguageContext.jsx';
 
 const BottomNav = () => {
   const navigate = useNavigate();

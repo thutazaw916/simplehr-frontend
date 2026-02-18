@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useLanguage } from '../i18n/LanguageContext.jsx';
 import API from '../services/api';
 
 const Attendance = () => {
