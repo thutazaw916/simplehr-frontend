@@ -8,7 +8,7 @@ import BottomNav from '../components/BottomNav';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { lang, t, switchLanguage } = useLanguage();
   const navigate = useNavigate();
   const [todayStatus, setTodayStatus] = useState(null);
   const [myAttendances, setMyAttendances] = useState([]);
@@ -77,7 +77,16 @@ const Dashboard = () => {
           <h2 style={styles.userName}>{user?.name}</h2>
           <span style={styles.roleBadge}>{getRoleName(user?.role)}</span>
         </div>
-        <div style={styles.avatarCircle}>{user?.name?.charAt(0)}</div>
+        <div style={styles.headerRight}>
+          {/* Language Switch Button */}
+          <button
+            onClick={() => switchLanguage(lang === 'mm' ? 'en' : 'mm')}
+            style={styles.langBtn}
+          >
+            {lang === 'mm' ? '🇬🇧 EN' : '🇲🇲 MM'}
+          </button>
+          <div style={styles.avatarCircle}>{user?.name?.charAt(0)}</div>
+        </div>
       </div>
 
       <div style={styles.dateCard}>
@@ -206,9 +215,11 @@ const Dashboard = () => {
 const styles = {
   container: { maxWidth: '500px', margin: '0 auto', padding: '20px', paddingTop: '10px' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
+  headerRight: { display: 'flex', alignItems: 'center', gap: '10px' },
   greeting: { color: '#999', fontSize: '14px', marginBottom: '2px' },
   userName: { color: '#333', fontSize: '22px', marginBottom: '5px' },
   roleBadge: { backgroundColor: '#e8f0fe', color: '#1a73e8', padding: '3px 12px', borderRadius: '12px', fontSize: '12px' },
+  langBtn: { padding: '6px 12px', backgroundColor: '#f0f0f0', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' },
   avatarCircle: { width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#1a73e8', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 'bold' },
   dateCard: { backgroundColor: '#e8f0fe', padding: '10px 15px', borderRadius: '10px', marginBottom: '20px' },
   dateText: { color: '#1a73e8', fontSize: '14px', textAlign: 'center' },
