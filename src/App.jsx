@@ -16,13 +16,41 @@ import Subscription from './pages/Subscription';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#0a0a0f',
+      color: '#71717a'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '40px', marginBottom: '12px', animation: 'pulse 1.5s ease-in-out infinite' }}>⏳</div>
+        <p style={{ fontSize: '14px', fontWeight: '500' }}>Loading...</p>
+      </div>
+    </div>
+  );
   return user ? children : <Navigate to="/login" />;
 };
 
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#0a0a0f',
+      color: '#71717a'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '40px', marginBottom: '12px', animation: 'pulse 1.5s ease-in-out infinite' }}>⏳</div>
+        <p style={{ fontSize: '14px', fontWeight: '500' }}>Loading...</p>
+      </div>
+    </div>
+  );
   return !user ? children : <Navigate to="/dashboard" />;
 };
 
@@ -32,7 +60,35 @@ function App() {
       <LanguageProvider>
         <AuthProvider>
           <BrowserRouter>
-            <Toaster position="top-right" />
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: 'rgba(24, 24, 27, 0.95)',
+                  color: '#e4e4e7',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '14px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                },
+                success: {
+                  iconTheme: {
+                    primary: '#34d399',
+                    secondary: '#0a0a0f',
+                  },
+                },
+                error: {
+                  iconTheme: {
+                    primary: '#f87171',
+                    secondary: '#0a0a0f',
+                  },
+                },
+              }}
+            />
             <Routes>
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
               <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
@@ -45,6 +101,7 @@ function App() {
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
               <Route path="/" element={<Navigate to="/dashboard" />} />
+              <Route path="*" element={<Navigate to="/dashboard" />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>

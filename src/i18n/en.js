@@ -55,7 +55,6 @@ export default {
 
   // Leave
   applyLeave: 'Apply Leave',
-  leaveBalance: 'Leave Balance',
   leaveHistory: 'Leave History',
   approved: 'Approved',
   rejected: 'Rejected',
@@ -166,4 +165,83 @@ export default {
   themeMode: 'Theme',
   darkMode: 'Dark Mode',
   lightMode: 'Light Mode',
+
+  // Overtime
+  overtime: 'Overtime',
+  requestOT: 'Request OT',
+  otHours: 'OT Hours',
+  normalOT: 'Normal OT',
+  holidayOT: 'Holiday OT',
+  weekendOT: 'Weekend OT',
+  otDate: 'OT Date',
+  otReason: 'Reason',
+  otRate: 'Rate',
+
+  // Advance Salary
+  advanceSalary: 'Advance Salary',
+  requestAdvance: 'Request Advance',
+  advanceAmount: 'Amount',
+  advanceReason: 'Reason',
+  deductFrom: 'Deduct From',
+  advanceHistory: 'Advance History',
+
+  // SSB
+  ssb: 'SSB (Social Security)',
+  ssbEmployee: 'Employee SSB (2%)',
+  ssbEmployer: 'Employer SSB (3%)',
+
+  // Tax
+  incomeTax: 'Income Tax',
+  taxableIncome: 'Taxable Income',
+  taxRate: 'Tax Rate',
+
+  // Payroll Details
+  grossSalary: 'Gross Salary',
+  totalDeductions: 'Total Deductions',
+  totalAllowances: 'Total Allowances',
+  overtimePay: 'Overtime Pay',
+  latePenalty: 'Late Penalty',
+  absentPenalty: 'Absent Penalty',
+  loanDeduction: 'Loan Deduction',
+  transportAllowance: 'Transport',
+  mealAllowance: 'Meal',
+  housingAllowance: 'Housing',
+  phoneAllowance: 'Phone',
+  positionAllowance: 'Position',
+
+  // Payment Methods
+  payVia: 'Pay via',
+  kbzpay: 'KBZPay',
+  wavepay: 'WavePay',
+  cbpay: 'CB Pay',
+  ayapay: 'AYA Pay',
+  cashPayment: 'Cash',
+  bankTransferPayment: 'Bank Transfer',
+
+  // PDF
+  downloadPDF: 'Download PDF',
+  payslipTitle: 'PAYSLIP',
+  companyPayslip: 'Monthly Payslip',
+  generatedOn: 'Generated on',
+
+  // Leave Balance
+  leaveBalance: 'Leave Balance',
+  earnedLeave: 'Earned Leave',
+  maternityLeave: 'Maternity Leave',
+  paternityLeave: 'Paternity Leave',
+  totalLeave: 'Total',
+  usedLeave: 'Used',
+  remainingLeave: 'Remaining',
+
+  // Payment Config
+  paymentSettings: 'Payment Settings',
+  ssbSettings: 'SSB Settings',
+  overtimeSettings: 'Overtime Settings',
+  leaveSettings: 'Leave Settings',
+  workingHours: 'Working Hours',
+
+  // Status
+  processing: 'Processing',
+  failed: 'Failed',
+  deducted: 'Deducted',
 };

@@ -55,7 +55,6 @@ export default {
 
   // Leave
   applyLeave: 'ခွင့်တင်မယ်',
-  leaveBalance: 'ခွင့်ရက်ကျန်',
   leaveHistory: 'ခွင့်မှတ်တမ်း',
   approved: 'ခွင့်ပြုပြီး',
   rejected: 'ပယ်ချပြီး',
@@ -166,4 +165,83 @@ export default {
   themeMode: 'အပြင်အဆင်',
   darkMode: 'Dark Mode',
   lightMode: 'Light Mode',
+
+  // Overtime
+  overtime: 'အချိန်ပိုနာရီ',
+  requestOT: 'အချိန်ပိုတောင်းမယ်',
+  otHours: 'အချိန်ပိုနာရီ',
+  normalOT: 'ပုံမှန်အချိန်ပို',
+  holidayOT: 'ရုံးပိတ်ရက်အချိန်ပို',
+  weekendOT: 'စနေ/တနင်္ဂနွေအချိန်ပို',
+  otDate: 'အချိန်ပိုရက်',
+  otReason: 'အကြောင်းပြချက်',
+  otRate: 'နှုန်း',
+
+  // Advance Salary
+  advanceSalary: 'လစာကြိုတင်ငွေ',
+  requestAdvance: 'လစာကြိုတင်တောင်းမယ်',
+  advanceAmount: 'ပမာဏ',
+  advanceReason: 'အကြောင်းပြချက်',
+  deductFrom: 'နုတ်ယူမည့်လ',
+  advanceHistory: 'ကြိုတင်ငွေမှတ်တမ်း',
+
+  // SSB
+  ssb: 'လူမှုဖူလုံရေး (SSB)',
+  ssbEmployee: 'ဝန်ထမ်း SSB (၂%)',
+  ssbEmployer: 'အလုပ်ရှင် SSB (၃%)',
+
+  // Tax
+  incomeTax: 'ဝင်ငွေခွန်',
+  taxableIncome: 'အခွန်ကျသင့်ဝင်ငွေ',
+  taxRate: 'အခွန်နှုန်း',
+
+  // Payroll Details
+  grossSalary: 'စုစုပေါင်းလစာ',
+  totalDeductions: 'စုစုပေါင်းနုတ်ယူငွေ',
+  totalAllowances: 'စုစုပေါင်းထောက်ပံ့ငွေ',
+  overtimePay: 'အချိန်ပိုကြေး',
+  latePenalty: 'နောက်ကျဒဏ်ကြေး',
+  absentPenalty: 'ပျက်ကွက်ဒဏ်ကြေး',
+  loanDeduction: 'ချေးငွေနုတ်ယူ',
+  transportAllowance: 'သွားလာစရိတ်',
+  mealAllowance: 'ထမင်းစရိတ်',
+  housingAllowance: 'အိမ်ခန်းစရိတ်',
+  phoneAllowance: 'ဖုန်းစရိတ်',
+  positionAllowance: 'ရာထူးထောက်ပံ့ငွေ',
+
+  // Payment Methods
+  payVia: 'ငွေပေးချေနည်း',
+  kbzpay: 'KBZPay',
+  wavepay: 'WavePay',
+  cbpay: 'CB Pay',
+  ayapay: 'AYA Pay',
+  cashPayment: 'လက်ငင်း',
+  bankTransferPayment: 'ဘဏ်လွှဲ',
+
+  // PDF
+  downloadPDF: 'PDF ဒေါင်းလုဒ်',
+  payslipTitle: 'လစာဖော်ပြချက်',
+  companyPayslip: 'လစဉ်လစာဖော်ပြချက်',
+  generatedOn: 'ထုတ်ပေးသည့်ရက်',
+
+  // Leave Balance
+  leaveBalance: 'ခွင့်ရက်ကျန်',
+  earnedLeave: 'အလုပ်လုပ်ခွင့်',
+  maternityLeave: 'မီးဖွားခွင့်',
+  paternityLeave: 'ဖခင်ခွင့်',
+  totalLeave: 'စုစုပေါင်း',
+  usedLeave: 'သုံးပြီး',
+  remainingLeave: 'ကျန်ရှိ',
+
+  // Payment Config
+  paymentSettings: 'ငွေပေးချေမှုဆက်တင်',
+  ssbSettings: 'SSB ဆက်တင်',
+  overtimeSettings: 'အချိန်ပိုဆက်တင်',
+  leaveSettings: 'ခွင့်ရက်ဆက်တင်',
+  workingHours: 'အလုပ်ချိန်',
+
+  // Status
+  processing: 'ဆောင်ရွက်ဆဲ',
+  failed: 'မအောင်မြင်',
+  deducted: 'နုတ်ယူပြီး',
 };
