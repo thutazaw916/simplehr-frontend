@@ -28,29 +28,66 @@ const Register = () => {
     setLoading(false);
   };
 
+  const fields = [
+    { name: 'name', icon: '👤', placeholder: t('namePlaceholder'), type: 'text' },
+    { name: 'phone', icon: '📱', placeholder: t('phonePlaceholder'), type: 'text' },
+    { name: 'password', icon: '🔒', placeholder: t('passwordPlaceholder'), type: 'password' },
+    { name: 'companyName', icon: '🏢', placeholder: t('companyNamePlaceholder'), type: 'text' },
+  ];
+
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        {/* Language Switch */}
+    <div style={styles.wrapper}>
+      <div style={styles.bgOrb1}></div>
+      <div style={styles.bgOrb2}></div>
+
+      <div style={styles.container}>
         <div style={styles.langRow}>
-          <button onClick={() => switchLanguage('mm')} style={{ ...styles.langBtn, backgroundColor: lang === 'mm' ? '#1a73e8' : '#f0f0f0', color: lang === 'mm' ? 'white' : '#333' }}>🇲🇲 မြန်မာ</button>
-          <button onClick={() => switchLanguage('en')} style={{ ...styles.langBtn, backgroundColor: lang === 'en' ? '#1a73e8' : '#f0f0f0', color: lang === 'en' ? 'white' : '#333' }}>🇬🇧 EN</button>
+          <button
+            onClick={() => switchLanguage('mm')}
+            style={{ ...styles.langBtn, ...(lang === 'mm' ? styles.langBtnActive : {}) }}
+          >🇲🇲 မြန်မာ</button>
+          <button
+            onClick={() => switchLanguage('en')}
+            style={{ ...styles.langBtn, ...(lang === 'en' ? styles.langBtnActive : {}) }}
+          >🇬🇧 EN</button>
         </div>
 
-        <div style={styles.logo}>S</div>
+        <div style={styles.logoContainer}>
+          <div style={styles.logo}><span style={styles.logoText}>S</span></div>
+          <div style={styles.logoGlow}></div>
+        </div>
+
         <h1 style={styles.title}>{t('register')}</h1>
-        <p style={styles.subtitle}>SimpleHR</p>
-        <form onSubmit={handleSubmit}>
-          <input type="text" name="name" value={form.name} onChange={handleChange} placeholder={t('namePlaceholder')} style={styles.input} required />
-          <input type="text" name="phone" value={form.phone} onChange={handleChange} placeholder={t('phonePlaceholder')} style={styles.input} required />
-          <input type="password" name="password" value={form.password} onChange={handleChange} placeholder={t('passwordPlaceholder')} style={styles.input} required />
-          <input type="text" name="companyName" value={form.companyName} onChange={handleChange} placeholder={t('companyNamePlaceholder')} style={styles.input} required />
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? t('loading') : t('register')}
+        <p style={styles.subtitle}>Create your workspace</p>
+
+        <form onSubmit={handleSubmit} style={styles.form}>
+          {fields.map((field) => (
+            <div key={field.name} style={styles.inputGroup}>
+              <label style={styles.label}>{field.icon} {field.placeholder}</label>
+              <input
+                type={field.type}
+                name={field.name}
+                value={form[field.name]}
+                onChange={handleChange}
+                placeholder={field.placeholder}
+                style={styles.input}
+                required
+              />
+            </div>
+          ))}
+
+          <button
+            type="submit"
+            style={{ ...styles.submitBtn, ...(loading ? { opacity: 0.7 } : {}) }}
+            disabled={loading}
+          >
+            {loading ? t('loading') : `${t('register')} ✨`}
           </button>
         </form>
-        <p style={styles.link}>
-          {t('hasAccount')} <Link to="/login" style={{ fontWeight: 'bold' }}>{t('login')}</Link>
+
+        <p style={styles.linkText}>
+          {t('hasAccount')}{' '}
+          <Link to="/login" style={styles.link}>{t('login')}</Link>
         </p>
       </div>
     </div>
@@ -58,16 +95,144 @@ const Register = () => {
 };
 
 const styles = {
-  container: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a73e8', padding: '20px' },
-  card: { backgroundColor: 'white', padding: '35px 30px', borderRadius: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)', width: '100%', maxWidth: '380px' },
-  langRow: { display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '20px' },
-  langBtn: { padding: '6px 14px', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold' },
-  logo: { width: '60px', height: '60px', borderRadius: '15px', backgroundColor: '#1a73e8', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 'bold', margin: '0 auto 15px' },
-  title: { textAlign: 'center', color: '#333', marginBottom: '5px', fontSize: '24px' },
-  subtitle: { textAlign: 'center', color: '#999', marginBottom: '25px', fontSize: '14px' },
-  input: { width: '100%', padding: '14px 16px', border: '2px solid #eee', borderRadius: '12px', fontSize: '16px', boxSizing: 'border-box', backgroundColor: '#f8f9fa', marginBottom: '12px' },
-  button: { width: '100%', padding: '14px', backgroundColor: '#1a73e8', color: 'white', border: 'none', borderRadius: '12px', fontSize: '16px', cursor: 'pointer', fontWeight: 'bold', marginTop: '5px' },
-  link: { textAlign: 'center', marginTop: '20px', color: '#999', fontSize: '14px' }
+  wrapper: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#0a0a0f',
+    padding: '20px',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  bgOrb1: {
+    position: 'absolute',
+    top: '-15%',
+    right: '-10%',
+    width: '500px',
+    height: '500px',
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, transparent 70%)',
+    filter: 'blur(60px)',
+    pointerEvents: 'none',
+  },
+  bgOrb2: {
+    position: 'absolute',
+    bottom: '-15%',
+    left: '-10%',
+    width: '400px',
+    height: '400px',
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(52, 211, 153, 0.08) 0%, transparent 70%)',
+    filter: 'blur(60px)',
+    pointerEvents: 'none',
+  },
+  container: {
+    width: '100%',
+    maxWidth: '420px',
+    background: 'rgba(255, 255, 255, 0.03)',
+    backdropFilter: 'blur(40px)',
+    WebkitBackdropFilter: 'blur(40px)',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+    borderRadius: '28px',
+    padding: '36px 32px',
+    position: 'relative',
+    zIndex: 1,
+    animation: 'fadeIn 0.6s ease-out',
+  },
+  langRow: { display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '28px' },
+  langBtn: {
+    padding: '8px 18px',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '12px',
+    fontSize: '13px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    background: 'rgba(255, 255, 255, 0.03)',
+    color: '#71717a',
+    transition: 'all 0.2s',
+  },
+  langBtnActive: {
+    background: 'rgba(129, 140, 248, 0.15)',
+    borderColor: 'rgba(129, 140, 248, 0.3)',
+    color: '#818cf8',
+  },
+  logoContainer: {
+    position: 'relative',
+    width: '64px',
+    height: '64px',
+    margin: '0 auto 16px',
+  },
+  logo: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '20px',
+    background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    zIndex: 1,
+    boxShadow: '0 8px 32px rgba(129, 140, 248, 0.3)',
+  },
+  logoText: { fontSize: '28px', fontWeight: '800', color: 'white' },
+  logoGlow: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '90px',
+    height: '90px',
+    borderRadius: '50%',
+    background: 'rgba(129, 140, 248, 0.2)',
+    filter: 'blur(25px)',
+    zIndex: 0,
+  },
+  title: {
+    textAlign: 'center',
+    color: '#e4e4e7',
+    marginBottom: '6px',
+    fontSize: '26px',
+    fontWeight: '800',
+    letterSpacing: '-0.5px',
+  },
+  subtitle: {
+    textAlign: 'center',
+    color: '#52525b',
+    marginBottom: '32px',
+    fontSize: '13px',
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+  },
+  form: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
+  label: { fontSize: '13px', fontWeight: '600', color: '#a1a1aa' },
+  input: {
+    width: '100%',
+    padding: '14px 18px',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '14px',
+    fontSize: '15px',
+    boxSizing: 'border-box',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    color: '#e4e4e7',
+    fontWeight: '500',
+  },
+  submitBtn: {
+    width: '100%',
+    padding: '16px',
+    background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '14px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    fontWeight: '700',
+    marginTop: '4px',
+    boxShadow: '0 4px 20px rgba(129, 140, 248, 0.3)',
+  },
+  linkText: { textAlign: 'center', marginTop: '24px', color: '#52525b', fontSize: '14px' },
+  link: { color: '#818cf8', fontWeight: '700' },
 };
 
 export default Register;
