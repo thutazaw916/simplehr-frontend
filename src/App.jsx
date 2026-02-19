@@ -13,6 +13,7 @@ import Leaves from './pages/Leaves';
 import Payroll from './pages/Payroll';
 import Profile from './pages/Profile';
 import Subscription from './pages/Subscription';
+import Analytics from './pages/Analytics';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -76,16 +77,10 @@ function App() {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
                 },
                 success: {
-                  iconTheme: {
-                    primary: '#34d399',
-                    secondary: '#0a0a0f',
-                  },
+                  iconTheme: { primary: '#34d399', secondary: '#0a0a0f' },
                 },
                 error: {
-                  iconTheme: {
-                    primary: '#f87171',
-                    secondary: '#0a0a0f',
-                  },
+                  iconTheme: { primary: '#f87171', secondary: '#0a0a0f' },
                 },
               }}
             />
@@ -100,6 +95,7 @@ function App() {
               <Route path="/payroll" element={<PrivateRoute><Payroll /></PrivateRoute>} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+              <Route path="/analytics" element={<PrivateRoute><Analytics /></PrivateRoute>} />
               <Route path="/" element={<Navigate to="/dashboard" />} />
               <Route path="*" element={<Navigate to="/dashboard" />} />
             </Routes>
