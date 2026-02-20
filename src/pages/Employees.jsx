@@ -10,17 +10,24 @@ const Employees = () => {
   const { t } = useLanguage();
   const { theme } = useTheme();
   const [employees, setEmployees] = useState([]);
+  const [positions, setPositions] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', password: '123456', role: 'employee' });
+  const [form, setForm] = useState({ name: '', phone: '', password: '123456', role: 'employee', position: '', department: '', joinDate: new Date().toISOString().split('T')[0], salary: '' });
   const [editId, setEditId] = useState(null);
+  const [search, setSearch] = useState('');
 
-  useEffect(() => { fetchEmployees(); }, []);
+  useEffect(() => { fetchAll(); }, []);
 
-  const fetchEmployees = async () => {
+  const fetchAll = async () => {
     try {
-      const res = await API.get('/employees');
-      setEmployees(res.data.data);
-    } catch (error) { toast.error(t('error')); }
+      const [empRes, posRes, deptRes] = await Promise.all([
+        API.get('/employees'), API.get('/payment-config/positions'), API.get('/departments')
+      ]);
+      setEmployees(empRes.data.data);
+      setPositions(posRes.data.data || []);
+      setDepartments(deptRes.data.data || []);
+    } catch (error) { console.log('Error:', error.message); }
   };
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,127 +35,127 @@ const Employees = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editId) {
-        await API.put(`/employees/${editId}`, form);
-      } else {
-        await API.post('/employees', form);
-      }
+      const payload = { ...form, salary: Number(form.salary) || 0 };
+      if (editId) await API.put(`/employees/${editId}`, payload);
+      else await API.post('/employees', payload);
       toast.success(t('success'));
-      setForm({ name: '', phone: '', password: '123456', role: 'employee' });
-      setShowForm(false);
-      setEditId(null);
-      fetchEmployees();
+      resetForm();
+      fetchAll();
     } catch (error) { toast.error(error.response?.data?.message || t('error')); }
   };
 
+  const resetForm = () => {
+    setForm({ name: '', phone: '', password: '123456', role: 'employee', position: '', department: '', joinDate: new Date().toISOString().split('T')[0], salary: '' });
+    setShowForm(false);
+    setEditId(null);
+  };
+
   const handleEdit = (emp) => {
-    setForm({ name: emp.name, phone: emp.phone, password: '', role: emp.role });
+    setForm({ name: emp.name, phone: emp.phone, password: '', role: emp.role, position: emp.position || '', department: emp.department?._id || '', joinDate: emp.joinDate ? new Date(emp.joinDate).toISOString().split('T')[0] : '', salary: emp.salary || '' });
     setEditId(emp._id);
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm(t('confirm') + '?')) {
-      try {
-        await API.delete(`/employees/${id}`);
-        toast.success(t('success'));
-        fetchEmployees();
-      } catch (error) { toast.error(t('error')); }
+    if (window.confirm('Delete this employee?')) {
+      try { await API.delete(`/employees/${id}`); toast.success(t('success')); fetchAll(); }
+      catch (error) { toast.error(t('error')); }
     }
   };
 
-  const roleColors = {
-    owner: { bg: theme.primaryLight, text: theme.primary },
-    hr: { bg: theme.infoLight, text: theme.info },
-    employee: { bg: theme.successLight, text: theme.success },
-  };
+  const filtered = employees.filter(emp =>
+    emp.name?.toLowerCase().includes(search.toLowerCase()) ||
+    emp.phone?.includes(search) ||
+    emp.position?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const i = (extra) => ({ width: '100%', padding: '12px 14px', borderRadius: '12px', fontSize: '13px', boxSizing: 'border-box', fontWeight: '500', background: theme.inputBg, border: `1px solid ${theme.inputBorder}`, color: theme.text, ...extra });
 
   return (
-    <div style={{ ...s.container, background: theme.gradientBg, minHeight: '100vh' }}>
-      <div style={s.header}>
-        <h1 style={{ ...s.title, color: theme.text }}>👥 {t('employees')}</h1>
-        <div style={s.headerBtns}>
-          <button onClick={() => navigate('/dashboard')} style={{ ...s.backBtn, background: theme.cardBg, border: `1px solid ${theme.cardBorder}`, color: theme.text }}>
-            ← {t('back')}
-          </button>
-          <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ name: '', phone: '', password: '123456', role: 'employee' }); }}
-            style={{ ...s.addBtn, background: showForm ? theme.dangerLight : theme.gradient1, color: showForm ? theme.danger : 'white' }}>
-            {showForm ? '✕ ' + t('cancel') : '+ ' + t('addEmployee')}
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px', minHeight: '100vh', background: theme.bg }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+        <div>
+          <p style={{ color: theme.textMuted, fontSize: '12px', fontWeight: '500', letterSpacing: '1px', textTransform: 'uppercase' }}>Team</p>
+          <h1 style={{ color: theme.text, fontSize: '24px', fontWeight: '800' }}>{t('employees')}</h1>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => navigate('/dashboard')} style={{ padding: '10px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', background: theme.cardBg, border: `1px solid ${theme.cardBorder}`, color: theme.textSecondary }}>←</button>
+          <button onClick={() => { if (showForm) resetForm(); else setShowForm(true); }}
+            style={{ padding: '10px 16px', borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', background: showForm ? 'transparent' : theme.primary, border: showForm ? `1px solid ${theme.danger}` : 'none', color: showForm ? theme.danger : 'white' }}>
+            {showForm ? t('cancel') : '+ Add'}
           </button>
         </div>
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '14px', marginBottom: '10px', background: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, phone, position..."
+          style={{ flex: 1, border: 'none', background: 'transparent', fontSize: '14px', outline: 'none', fontWeight: '500', color: theme.text }} />
+      </div>
+
+      <p style={{ color: theme.textMuted, fontSize: '12px', marginBottom: '12px' }}>{filtered.length} employees</p>
+
       {showForm && (
-        <div style={{ ...s.formCard, background: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
-          <h3 style={{ color: theme.text, fontWeight: '700', marginBottom: '16px' }}>
-            {editId ? '✏️ ' + t('edit') : '✨ ' + t('addEmployee')}
-          </h3>
-          <form onSubmit={handleSubmit} style={s.form}>
-            <input type="text" name="name" value={form.name} onChange={handleChange} placeholder={t('namePlaceholder')} style={{ ...s.input, background: theme.inputBg, border: `1px solid ${theme.inputBorder}`, color: theme.text }} required />
-            <input type="text" name="phone" value={form.phone} onChange={handleChange} placeholder={t('phonePlaceholder')} style={{ ...s.input, background: theme.inputBg, border: `1px solid ${theme.inputBorder}`, color: theme.text }} required />
-            {!editId && <input type="password" name="password" value={form.password} onChange={handleChange} placeholder={t('passwordPlaceholder')} style={{ ...s.input, background: theme.inputBg, border: `1px solid ${theme.inputBorder}`, color: theme.text }} />}
-            <select name="role" value={form.role} onChange={handleChange} style={{ ...s.input, background: theme.inputBg, border: `1px solid ${theme.inputBorder}`, color: theme.text }}>
-              <option value="employee">{t('employee')}</option>
-              <option value="hr">{t('hr')}</option>
-            </select>
-            <button type="submit" style={{ ...s.submitBtn, background: theme.gradient1 }}>
-              {editId ? '💾 ' + t('save') : '✓ ' + t('add')}
-            </button>
+        <div style={{ padding: '20px', borderRadius: '16px', marginBottom: '16px', background: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
+          <p style={{ color: theme.text, fontWeight: '700', fontSize: '15px', marginBottom: '16px' }}>{editId ? 'Edit' : 'New'} Employee</p>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Full Name" style={i()} required />
+              <input type="text" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" style={i()} required />
+            </div>
+            {!editId && <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Password" style={i()} />}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <select name="role" value={form.role} onChange={handleChange} style={i()}>
+                <option value="employee">{t('employee')}</option>
+                <option value="hr">{t('hr')}</option>
+              </select>
+              <select name="position" value={form.position} onChange={handleChange} style={i()}>
+                <option value="">Position</option>
+                {positions.map((pos, idx) => <option key={idx} value={pos.name}>{pos.name}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <select name="department" value={form.department} onChange={handleChange} style={i()}>
+                <option value="">Department</option>
+                {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
+              </select>
+              <input type="date" name="joinDate" value={form.joinDate} onChange={handleChange} style={i()} />
+            </div>
+            <input type="number" name="salary" value={form.salary} onChange={handleChange} placeholder="Monthly Salary (Ks)" style={i()} />
+            <button type="submit" style={{ width: '100%', padding: '13px', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: '700', background: theme.primary }}>{editId ? 'Update' : 'Add Employee'}</button>
           </form>
         </div>
       )}
 
-      <div style={s.list}>
-        {employees.map((emp, index) => (
-          <div key={emp._id} style={{ ...s.card, background: theme.cardBg, border: `1px solid ${theme.cardBorder}`, animationDelay: `${index * 0.05}s` }}>
-            <div style={s.cardLeft}>
-              <div style={{ ...s.empAvatar, background: theme.gradient1 }}>
-                {emp.name?.charAt(0)}
-              </div>
-              <div>
-                <h4 style={{ color: theme.text, fontWeight: '700', fontSize: '15px', marginBottom: '4px' }}>{emp.name}</h4>
-                <p style={{ color: theme.textMuted, fontSize: '12px', marginBottom: '6px' }}>{emp.phone}</p>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <span style={{ ...s.chip, background: roleColors[emp.role]?.bg || theme.primaryLight, color: roleColors[emp.role]?.text || theme.primary }}>
-                    {emp.role === 'owner' ? t('owner') : emp.role === 'hr' ? t('hr') : t('employee')}
-                  </span>
-                  <span style={{ ...s.chip, background: emp.isActive ? theme.successLight : theme.dangerLight, color: emp.isActive ? theme.success : theme.danger }}>
-                    {emp.isActive ? '● ' + t('active') : '○ ' + t('inactive')}
-                  </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {filtered.map(emp => (
+          <div key={emp._id} style={{ borderRadius: '16px', overflow: 'hidden', background: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '17px', background: theme.primaryLight, color: theme.primary, flexShrink: 0 }}>{emp.name?.charAt(0)}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                  <p style={{ color: theme.text, fontWeight: '700', fontSize: '14px' }}>{emp.name}</p>
+                  <span style={{ padding: '2px 8px', borderRadius: '6px', fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', background: emp.role === 'owner' ? theme.dangerLight : emp.role === 'hr' ? theme.infoLight : theme.successLight, color: emp.role === 'owner' ? theme.danger : emp.role === 'hr' ? theme.info : theme.success }}>{emp.role}</span>
                 </div>
+                <p style={{ color: theme.textMuted, fontSize: '12px' }}>{emp.phone}</p>
+                {emp.position && <p style={{ color: theme.primary, fontSize: '11px', fontWeight: '600', marginTop: '2px' }}>{emp.position}</p>}
+                {emp.department?.name && <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: '600', marginTop: '4px', background: theme.primaryLight, color: theme.primary }}>{emp.department.name}</span>}
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ color: emp.isActive ? theme.success : theme.danger, fontSize: '10px', fontWeight: '700' }}>{emp.isActive ? '● Active' : '○ Inactive'}</p>
+                {emp.joinDate && <p style={{ color: theme.textMuted, fontSize: '10px', marginTop: '4px' }}>Since {new Date(emp.joinDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>}
               </div>
             </div>
-            <div style={s.cardActions}>
-              <button onClick={() => handleEdit(emp)} style={{ ...s.actionBtn, background: theme.warningLight, color: theme.warning }}>✏️</button>
-              <button onClick={() => handleDelete(emp._id)} style={{ ...s.actionBtn, background: theme.dangerLight, color: theme.danger }}>🗑️</button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '8px 16px', borderTop: `1px solid ${theme.border}` }}>
+              <button onClick={() => handleEdit(emp)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', color: theme.primary }}>Edit</button>
+              <div style={{ width: '1px', height: '16px', background: theme.border }}></div>
+              <button onClick={() => handleDelete(emp._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '600', color: theme.danger }}>Remove</button>
             </div>
           </div>
         ))}
-        {employees.length === 0 && <div style={{ ...s.empty, color: theme.textMuted }}><span style={{ fontSize: '36px' }}>📭</span><p>{t('noRecords')}</p></div>}
+        {filtered.length === 0 && <p style={{ textAlign: 'center', padding: '40px', color: theme.textMuted, fontSize: '14px' }}>No employees found</p>}
       </div>
     </div>
   );
-};
-
-const s = {
-  container: { maxWidth: '600px', margin: '0 auto', padding: '20px' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' },
-  title: { fontSize: '22px', fontWeight: '800', letterSpacing: '-0.5px' },
-  headerBtns: { display: 'flex', gap: '8px' },
-  backBtn: { padding: '10px 18px', borderRadius: '14px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', border: 'none' },
-  addBtn: { padding: '10px 18px', borderRadius: '14px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', border: 'none', boxShadow: '0 4px 15px rgba(129, 140, 248, 0.2)' },
-  formCard: { padding: '24px', borderRadius: '20px', marginBottom: '20px', animation: 'slideUp 0.3s ease-out' },
-  form: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  input: { width: '100%', padding: '14px 18px', borderRadius: '14px', fontSize: '14px', boxSizing: 'border-box', fontWeight: '500' },
-  submitBtn: { width: '100%', padding: '14px', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontSize: '15px', fontWeight: '700', boxShadow: '0 4px 15px rgba(129, 140, 248, 0.3)' },
-  list: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  card: { padding: '16px', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', animation: 'fadeIn 0.4s ease-out' },
-  cardLeft: { display: 'flex', alignItems: 'center', gap: '14px' },
-  empAvatar: { width: '48px', height: '48px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '800', fontSize: '18px', boxShadow: '0 4px 12px rgba(129, 140, 248, 0.2)' },
-  chip: { padding: '3px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', letterSpacing: '0.3px' },
-  cardActions: { display: 'flex', gap: '6px' },
-  actionBtn: { width: '38px', height: '38px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  empty: { textAlign: 'center', padding: '50px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' },
 };
 
 export default Employees;

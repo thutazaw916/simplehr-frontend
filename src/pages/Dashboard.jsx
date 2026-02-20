@@ -45,23 +45,65 @@ const Dashboard = () => {
   };
 
   const handleCheckIn = async () => {
-    try {
-      const res = await API.post('/attendance/checkin', { note: '' });
-      toast.success(res.data.message);
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('checkInFailed'));
+    if (!navigator.geolocation) {
+      try {
+        const res = await API.post('/attendance/checkin', { note: '' });
+        toast.success(res.data.message);
+        fetchData();
+      } catch (error) { toast.error(error.response?.data?.message || t('checkInFailed')); }
+      return;
     }
+    toast.loading('Getting location...', { id: 'gps' });
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        toast.dismiss('gps');
+        try {
+          const res = await API.post('/attendance/checkin', { latitude: pos.coords.latitude, longitude: pos.coords.longitude, note: '' });
+          toast.success(res.data.message);
+          fetchData();
+        } catch (error) { toast.error(error.response?.data?.message || t('checkInFailed')); }
+      },
+      async () => {
+        toast.dismiss('gps');
+        try {
+          const res = await API.post('/attendance/checkin', { note: '' });
+          toast.success(res.data.message);
+          fetchData();
+        } catch (error) { toast.error(error.response?.data?.message || 'Enable GPS'); }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
   const handleCheckOut = async () => {
-    try {
-      const res = await API.put('/attendance/checkout', { note: '' });
-      toast.success(res.data.message);
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('checkOutFailed'));
+    if (!navigator.geolocation) {
+      try {
+        const res = await API.put('/attendance/checkout', { note: '' });
+        toast.success(res.data.message);
+        fetchData();
+      } catch (error) { toast.error(error.response?.data?.message || t('checkOutFailed')); }
+      return;
     }
+    toast.loading('Getting location...', { id: 'gps' });
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        toast.dismiss('gps');
+        try {
+          const res = await API.put('/attendance/checkout', { latitude: pos.coords.latitude, longitude: pos.coords.longitude, note: '' });
+          toast.success(res.data.message);
+          fetchData();
+        } catch (error) { toast.error(error.response?.data?.message || t('checkOutFailed')); }
+      },
+      async () => {
+        toast.dismiss('gps');
+        try {
+          const res = await API.put('/attendance/checkout', { note: '' });
+          toast.success(res.data.message);
+          fetchData();
+        } catch (error) { toast.error(error.response?.data?.message || t('checkOutFailed')); }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const isAdmin = user?.role === 'owner' || user?.role === 'hr';
@@ -76,7 +118,6 @@ const Dashboard = () => {
 
   return (
     <div style={{ ...s.container, background: theme.gradientBg }}>
-      {/* Header */}
       <div style={s.header}>
         <div style={s.headerLeft}>
           <p style={{ ...s.greeting, color: theme.textSecondary }}>{t('welcome')}</p>
@@ -94,13 +135,11 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Live Clock */}
       <div style={{ ...s.clockCard, background: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
         <p style={{ ...s.clockTime, color: theme.text }}>{timeStr}</p>
         <p style={{ ...s.clockDate, color: theme.textSecondary }}>{dateStr}</p>
       </div>
 
-      {/* Attendance Card */}
       <div style={{ ...s.attendanceCard, background: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
         <div style={s.cardHeader}>
           <h3 style={{ ...s.sectionTitle, color: theme.text }}><span style={s.sectionDot}></span>{t('todayAttendance')}</h3>
@@ -128,6 +167,11 @@ const Dashboard = () => {
                 </span>
               </div>
             </div>
+            {todayStatus.attendance?.checkIn?.locationVerified && (
+              <div style={{ ...s.gpsBadge, background: theme.successLight }}>
+                <span style={{ color: theme.success, fontSize: '11px', fontWeight: '600' }}>📍 Location verified ({todayStatus.attendance?.checkIn?.distanceFromOffice}m from office)</span>
+              </div>
+            )}
             <button onClick={handleCheckOut} style={s.checkOutBtn}>
               <div style={s.checkBtnIcon}>🏠</div>
               <div><p style={s.checkBtnLabel}>{t('checkOut')}</p><p style={s.checkBtnSub}>End your work day</p></div>
@@ -159,15 +203,14 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Stats */}
       {isAdmin && (
         <div style={s.statsRow}>
-          <div style={{ ...s.statCard, background: `linear-gradient(135deg, rgba(129,140,248,0.1) 0%, rgba(167,139,250,0.05) 100%)`, border: `1px solid ${theme.primaryGlow}` }} onClick={() => navigate('/employees')}>
+          <div style={{ ...s.statCard, background: `linear-gradient(135deg, rgba(129,140,248,0.1), rgba(167,139,250,0.05))`, border: `1px solid ${theme.primaryGlow}` }} onClick={() => navigate('/employees')}>
             <div style={{ ...s.statIcon, background: theme.primaryLight }}>👥</div>
             <h3 style={{ color: theme.primary, fontSize: '32px', fontWeight: '900', margin: '8px 0 2px' }}>{stats.employees}</h3>
             <p style={{ color: theme.textSecondary, fontSize: '12px', fontWeight: '600' }}>{t('totalEmployees')}</p>
           </div>
-          <div style={{ ...s.statCard, background: `linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(245,158,11,0.05) 100%)`, border: `1px solid rgba(251,191,36,0.2)` }} onClick={() => navigate('/leaves')}>
+          <div style={{ ...s.statCard, background: `linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))`, border: `1px solid rgba(251,191,36,0.2)` }} onClick={() => navigate('/leaves')}>
             <div style={{ ...s.statIcon, background: theme.warningLight }}>📋</div>
             <h3 style={{ color: theme.warning, fontSize: '32px', fontWeight: '900', margin: '8px 0 2px' }}>{stats.leaves}</h3>
             <p style={{ color: theme.textSecondary, fontSize: '12px', fontWeight: '600' }}>{t('leaveRequests')}</p>
@@ -175,7 +218,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Records */}
       <div style={s.section}>
         <div style={s.sectionHeader}>
           <h3 style={{ ...s.sectionTitle, color: theme.text }}><span style={s.sectionDot}></span>{t('records')}</h3>
@@ -207,16 +249,14 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Admin Menu - UPDATED WITH ANALYTICS */}
       {isAdmin && (
         <div style={s.section}>
           <h3 style={{ ...s.sectionTitle, color: theme.text, marginBottom: '14px' }}><span style={s.sectionDot}></span>{t('management')}</h3>
           <div style={s.menuGrid}>
             {[
-              { path: '/analytics', icon: '📊', label: 'Analytics', gradient: 'linear-gradient(135deg, rgba(244,114,182,0.12) 0%, rgba(129,140,248,0.12) 100%)' },
-              { path: '/departments', icon: '🏢', label: t('departments'), gradient: 'linear-gradient(135deg, rgba(129,140,248,0.12) 0%, rgba(129,140,248,0.04) 100%)' },
-              { path: '/attendance', icon: '📋', label: t('attendanceRecords'), gradient: 'linear-gradient(135deg, rgba(52,211,153,0.12) 0%, rgba(52,211,153,0.04) 100%)' },
-              { path: '/subscription', icon: '⭐', label: t('specialDays'), gradient: 'linear-gradient(135deg, rgba(251,191,36,0.12) 0%, rgba(251,191,36,0.04) 100%)' },
+              { path: '/analytics', icon: '📊', label: 'Analytics', gradient: `linear-gradient(135deg, rgba(244,114,182,0.12), transparent)` },
+              { path: '/departments', icon: '🏢', label: t('departments'), gradient: `linear-gradient(135deg, rgba(129,140,248,0.12), transparent)` },
+              { path: '/attendance', icon: '📋', label: t('attendanceRecords'), gradient: `linear-gradient(135deg, rgba(52,211,153,0.12), transparent)` },
             ].map((item) => (
               <div key={item.path} style={{ ...s.menuCard, background: item.gradient, border: `1px solid ${theme.cardBorder}` }} onClick={() => navigate(item.path)}>
                 <span style={{ fontSize: '32px' }}>{item.icon}</span>
@@ -250,8 +290,8 @@ const s = {
   cardHeader: { marginBottom: '16px' },
   sectionTitle: { fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' },
   sectionDot: { width: '8px', height: '8px', borderRadius: '50%', background: 'linear-gradient(135deg, #818cf8, #a78bfa)', display: 'inline-block' },
-  checkInBtn: { width: '100%', padding: '18px 20px', background: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)', border: 'none', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 4px 20px rgba(52, 211, 153, 0.3)', color: 'white' },
-  checkOutBtn: { width: '100%', padding: '18px 20px', background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', border: 'none', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '14px', marginTop: '12px', boxShadow: '0 4px 20px rgba(251, 191, 36, 0.3)', color: '#1a1a2e' },
+  checkInBtn: { width: '100%', padding: '18px 20px', background: 'linear-gradient(135deg, #34d399, #10b981)', border: 'none', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 4px 20px rgba(52, 211, 153, 0.3)', color: 'white' },
+  checkOutBtn: { width: '100%', padding: '18px 20px', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', border: 'none', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '14px', marginTop: '12px', boxShadow: '0 4px 20px rgba(251, 191, 36, 0.3)', color: '#1a1a2e' },
   checkBtnIcon: { fontSize: '28px', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.2)', borderRadius: '14px' },
   checkBtnLabel: { fontSize: '16px', fontWeight: '800', textAlign: 'left' },
   checkBtnSub: { fontSize: '12px', opacity: 0.8, textAlign: 'left', marginTop: '2px' },
@@ -261,6 +301,7 @@ const s = {
   timeInfoLabel: { fontSize: '11px', fontWeight: '700', marginBottom: '4px', textTransform: 'uppercase' },
   timeInfoValue: { fontSize: '20px', fontWeight: '800' },
   statusBadge: { display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '14px' },
+  gpsBadge: { padding: '8px 14px', borderRadius: '10px', marginBottom: '12px', textAlign: 'center' },
   completedGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '12px' },
   completedItem: { padding: '14px 10px', borderRadius: '14px', textAlign: 'center' },
   doneBar: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: '14px', borderLeft: '3px solid' },
@@ -275,7 +316,7 @@ const s = {
   recordDot: { width: '10px', height: '10px', borderRadius: '50%' },
   recordDate: { fontWeight: '700', fontSize: '14px', marginBottom: '2px' },
   emptyState: { textAlign: 'center', padding: '40px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', fontSize: '14px' },
-  menuGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' },
+  menuGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' },
   menuCard: { padding: '18px 10px', borderRadius: '18px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' },
 };
 
