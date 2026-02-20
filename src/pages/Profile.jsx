@@ -17,6 +17,8 @@ const Profile = () => {
   const [officeLng, setOfficeLng] = useState('');
   const [officeRadius, setOfficeRadius] = useState('200');
   const [officeAddress, setOfficeAddress] = useState('');
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -30,12 +32,12 @@ const Profile = () => {
           const configRes = await API.get('/payment-config');
           const config = configRes.data.data;
           if (config?.officeLocation) {
-            setOfficeLat(config.officeLocation.latitude || '');
-            setOfficeLng(config.officeLocation.longitude || '');
-            setOfficeRadius(config.officeLocation.radiusMeters || '200');
-            setOfficeAddress(config.officeLocation.address || '');
+            if (config.officeLocation.latitude) setOfficeLat(String(config.officeLocation.latitude));
+            if (config.officeLocation.longitude) setOfficeLng(String(config.officeLocation.longitude));
+            if (config.officeLocation.radiusMeters) setOfficeRadius(String(config.officeLocation.radiusMeters));
+            if (config.officeLocation.address) setOfficeAddress(config.officeLocation.address);
           }
-        } catch (e) { console.log('Config fetch error'); }
+        } catch (e) { console.log('Config not found, will create on save'); }
       }
     } catch (error) { console.log('Error:', error.message); }
   };
@@ -44,37 +46,95 @@ const Profile = () => {
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error('GPS not supported');
+      toast.error('GPS not supported on this device');
       return;
     }
-    toast.loading('Getting GPS...', { id: 'loc' });
+    setGpsLoading(true);
+    toast.loading('Getting your GPS location...', { id: 'loc' });
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         toast.dismiss('loc');
-        setOfficeLat(pos.coords.latitude.toString());
-        setOfficeLng(pos.coords.longitude.toString());
-        toast.success('Location captured!');
+        setGpsLoading(false);
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setOfficeLat(String(lat));
+        setOfficeLng(String(lng));
+        toast.success(`Location captured!\n${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       },
-      () => {
+      (err) => {
         toast.dismiss('loc');
-        toast.error('Failed to get location');
+        setGpsLoading(false);
+        toast.error('Failed to get location. Please enable GPS in your phone settings.');
+        console.log('GPS Error:', err.message);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
   const handleSaveOffice = async () => {
+    if (!officeLat || !officeLng) {
+      toast.error('Please get your location first! Tap "Use My Current Location" button.');
+      return;
+    }
+
+    const lat = parseFloat(officeLat);
+    const lng = parseFloat(officeLng);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      toast.error('Invalid coordinates. Please get location again.');
+      return;
+    }
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      toast.error('Invalid GPS coordinates.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        officeLocation: {
+          latitude: lat,
+          longitude: lng,
+          radiusMeters: parseInt(officeRadius) || 200,
+          address: officeAddress || ''
+        }
+      };
+
+      console.log('Saving office location:', payload);
+
+      const res = await API.put('/payment-config', payload);
+      console.log('Save response:', res.data);
+
+      toast.success(`Office location saved!\nEmployees must be within ${officeRadius}m to check in.`);
+      setShowOffice(false);
+    } catch (error) {
+      console.log('Save error:', error.response?.data || error.message);
+      toast.error('Failed to save: ' + (error.response?.data?.message || error.message));
+    }
+    setSaving(false);
+  };
+
+  const handleClearOffice = async () => {
+    if (!window.confirm('Remove office location? Employees will be able to check in from anywhere.')) return;
     try {
       await API.put('/payment-config', {
         officeLocation: {
-          latitude: parseFloat(officeLat),
-          longitude: parseFloat(officeLng),
-          radiusMeters: parseInt(officeRadius),
-          address: officeAddress
+          latitude: null,
+          longitude: null,
+          radiusMeters: 200,
+          address: ''
         }
       });
-      toast.success('Office location saved! Employees must be within ' + officeRadius + 'm to check in.');
-    } catch (error) { toast.error('Failed to save'); }
+      setOfficeLat('');
+      setOfficeLng('');
+      setOfficeAddress('');
+      setOfficeRadius('200');
+      toast.success('Office location removed. Check-in from anywhere is now allowed.');
+    } catch (error) {
+      toast.error('Failed to remove');
+    }
   };
 
   if (!profile) return (
@@ -88,6 +148,8 @@ const Profile = () => {
     boxSizing: 'border-box', fontWeight: '500',
     background: theme.inputBg, border: `1px solid ${theme.inputBorder}`, color: theme.text,
   };
+
+  const hasOfficeLocation = officeLat && officeLng;
 
   return (
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px', minHeight: '100vh', background: theme.bg }}>
@@ -155,7 +217,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Office Location Setting - Owner Only */}
+      {/* Office Location - Owner Only */}
       {user?.role === 'owner' && (
         <div style={{ padding: '20px', borderRadius: '20px', marginBottom: '12px', background: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showOffice ? '16px' : '0' }}>
@@ -163,8 +225,8 @@ const Profile = () => {
               <span style={{ fontSize: '24px' }}>📍</span>
               <div>
                 <p style={{ color: theme.text, fontWeight: '700', fontSize: '15px' }}>Office Location</p>
-                <p style={{ color: theme.textMuted, fontSize: '12px' }}>
-                  {officeLat && officeLng ? `Set (${Number(officeLat).toFixed(4)}, ${Number(officeLng).toFixed(4)}) - ${officeRadius}m` : 'Not set - employees can check in from anywhere'}
+                <p style={{ color: hasOfficeLocation ? theme.success : theme.warning, fontSize: '12px', fontWeight: '600' }}>
+                  {hasOfficeLocation ? `✅ Set — ${officeRadius}m radius` : '⚠️ Not set — check in from anywhere'}
                 </p>
               </div>
             </div>
@@ -176,46 +238,68 @@ const Profile = () => {
 
           {showOffice && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button onClick={handleGetCurrentLocation}
-                style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', background: 'linear-gradient(135deg, #34d399, #10b981)', color: 'white', border: 'none' }}>
-                📍 Use My Current Location as Office
-              </button>
 
-              <p style={{ color: theme.textMuted, fontSize: '11px', textAlign: 'center' }}>or enter manually</p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <input type="text" value={officeLat} onChange={(e) => setOfficeLat(e.target.value)} placeholder="Latitude" style={inp} />
-                <input type="text" value={officeLng} onChange={(e) => setOfficeLng(e.target.value)} placeholder="Longitude" style={inp} />
+              {/* Step 1: Get Location */}
+              <div style={{ padding: '14px', borderRadius: '14px', background: theme.bgTertiary, border: `1px solid ${theme.border}` }}>
+                <p style={{ color: theme.text, fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>Step 1: Get Office Location</p>
+                <p style={{ color: theme.textMuted, fontSize: '11px', marginBottom: '10px' }}>Go to your office and tap this button:</p>
+                <button onClick={handleGetCurrentLocation} disabled={gpsLoading}
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', background: 'linear-gradient(135deg, #34d399, #10b981)', color: 'white', border: 'none', opacity: gpsLoading ? 0.6 : 1 }}>
+                  {gpsLoading ? '⏳ Getting GPS...' : '📍 Use My Current Location'}
+                </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <select value={officeRadius} onChange={(e) => setOfficeRadius(e.target.value)} style={inp}>
-                  <option value="50">50m radius</option>
-                  <option value="100">100m radius</option>
-                  <option value="200">200m radius</option>
-                  <option value="300">300m radius</option>
-                  <option value="500">500m radius</option>
-                  <option value="1000">1km radius</option>
-                </select>
-                <input type="text" value={officeAddress} onChange={(e) => setOfficeAddress(e.target.value)} placeholder="Office address" style={inp} />
-              </div>
-
-              {officeLat && officeLng && (
-                <div style={{ padding: '12px', borderRadius: '12px', background: theme.successLight, textAlign: 'center' }}>
-                  <p style={{ color: theme.success, fontSize: '12px', fontWeight: '600' }}>
-                    📍 {Number(officeLat).toFixed(6)}, {Number(officeLng).toFixed(6)} — {officeRadius}m radius
+              {/* Show captured coordinates */}
+              {hasOfficeLocation && (
+                <div style={{ padding: '14px', borderRadius: '14px', background: theme.successLight, textAlign: 'center' }}>
+                  <p style={{ color: theme.success, fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>✅ Location Captured!</p>
+                  <p style={{ color: theme.success, fontSize: '12px' }}>
+                    Lat: {Number(officeLat).toFixed(6)} | Lng: {Number(officeLng).toFixed(6)}
                   </p>
                 </div>
               )}
 
-              <button onClick={handleSaveOffice}
-                style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', background: theme.primary, color: 'white', border: 'none' }}>
-                💾 Save Office Location
+              {/* Manual input */}
+              <p style={{ color: theme.textMuted, fontSize: '11px', textAlign: 'center' }}>or enter coordinates manually:</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <input type="number" step="any" value={officeLat} onChange={(e) => setOfficeLat(e.target.value)} placeholder="Latitude (eg: 16.8661)" style={inp} />
+                <input type="number" step="any" value={officeLng} onChange={(e) => setOfficeLng(e.target.value)} placeholder="Longitude (eg: 96.1951)" style={inp} />
+              </div>
+
+              {/* Step 2: Set Radius */}
+              <div style={{ padding: '14px', borderRadius: '14px', background: theme.bgTertiary, border: `1px solid ${theme.border}` }}>
+                <p style={{ color: theme.text, fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>Step 2: Set Check-in Radius</p>
+                <select value={officeRadius} onChange={(e) => setOfficeRadius(e.target.value)} style={inp}>
+                  <option value="50">50m — Small office</option>
+                  <option value="100">100m — Single building</option>
+                  <option value="200">200m — Recommended</option>
+                  <option value="300">300m — Large compound</option>
+                  <option value="500">500m — Factory area</option>
+                  <option value="1000">1km — Industrial zone</option>
+                </select>
+              </div>
+
+              {/* Optional address */}
+              <input type="text" value={officeAddress} onChange={(e) => setOfficeAddress(e.target.value)} placeholder="Office address (optional)" style={inp} />
+
+              {/* Save Button */}
+              <button onClick={handleSaveOffice} disabled={saving || !hasOfficeLocation}
+                style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', background: hasOfficeLocation ? theme.primary : theme.cardBgHover, color: hasOfficeLocation ? 'white' : theme.textMuted, border: 'none', opacity: saving ? 0.6 : 1 }}>
+                {saving ? '⏳ Saving...' : '💾 Save Office Location'}
               </button>
 
+              {/* Clear button */}
+              {hasOfficeLocation && (
+                <button onClick={handleClearOffice}
+                  style={{ width: '100%', padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', background: 'transparent', color: theme.danger, border: `1px solid ${theme.danger}` }}>
+                  🗑️ Remove Office Location (allow check-in from anywhere)
+                </button>
+              )}
+
+              {/* Warning */}
               <div style={{ padding: '10px 14px', borderRadius: '10px', background: theme.warningLight, borderLeft: `3px solid ${theme.warning}` }}>
                 <p style={{ color: theme.warning, fontSize: '11px', fontWeight: '600' }}>
-                  ⚠️ After saving, employees can ONLY check in when they are within {officeRadius}m of this location.
+                  ⚠️ After saving, employees can ONLY check in within {officeRadius}m of office.
                 </p>
               </div>
             </div>
