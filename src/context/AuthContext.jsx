@@ -1,7 +1,7 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import API from '../services/api';
+import React, { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -9,29 +9,37 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    if (token) {
+      // Token ရှိရင် user data ပြန်ယူတဲ့ logic ဒီမှာထည့်နိုင်ပါတယ်
+      const savedUser = JSON.parse(localStorage.getItem('user'));
+      setUser(savedUser);
     }
     setLoading(false);
   }, []);
 
-  const login = async (phone, password) => {
-    const res = await API.post('/auth/login', { phone, password });
-    const { token, ...userData } = res.data.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    return res.data;
+  // OTP တောင်းဆိုခြင်း
+  const requestOTP = async (phone) => {
+    try {
+      const res = await axios.post('/api/auth/request-otp', { phone });
+      return res.data;
+    } catch (error) {
+      throw error.response.data;
+    }
   };
 
-  const register = async (data) => {
-    const res = await API.post('/auth/register', data);
-    const { token, ...userData } = res.data.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    return res.data;
+  // OTP စစ်ဆေးခြင်း
+  const verifyOTP = async (phone, code) => {
+    try {
+      const res = await axios.post('/api/auth/verify-otp', { phone, code });
+      if (res.data.success) {
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        setUser(res.data.user);
+      }
+      return res.data;
+    } catch (error) {
+      throw error.response.data;
+    }
   };
 
   const logout = () => {
@@ -41,10 +49,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, loading, requestOTP, verifyOTP, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);
