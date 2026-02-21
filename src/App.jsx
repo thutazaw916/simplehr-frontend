@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './i18n/LanguageContext.jsx';
 import { ThemeProvider } from './theme/ThemeContext.jsx';
+import NotificationManager from './components/NotificationManager';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -32,6 +33,7 @@ function App() {
       <LanguageProvider>
         <AuthProvider>
           <BrowserRouter>
+            <NotificationManager />
             <Toaster position="top-center" toastOptions={{
               duration: 3000,
               style: { background: 'rgba(24,24,27,0.95)', color: '#e4e4e7', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 20px', fontSize: '13px', fontWeight: '600' },
